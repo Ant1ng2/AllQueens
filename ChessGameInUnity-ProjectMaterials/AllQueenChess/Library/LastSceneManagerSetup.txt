@@ -1,0 +1,4 @@
+sceneSetups:
+- path: C:/Users/aclin/Documents/Chess/ChessGameInUnity-ProjectMaterials/Chess-starter-project/Assets/Scenes/Main.unity
+  isLoaded: 1
+  isActive: 1
