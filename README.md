@@ -15,3 +15,9 @@ This game follows the rules of regular chess with the following exceptions:
 * This game is played with a 5-by-5 board and 12 Queens, 6 Queens are controlled by each player.
 * There are no captures.
 * The win condition is to line 4 Queens of a players color in a row, meaning horizontally, vertically, and diagonally.
+
+## Contents
+There are three folders:
+* Unity: Contains all the assets and scripts for the Project
+* Solver: Python3 Script for Game and Solver (still in development)
+* Build: Contains builds for the Unity demo
