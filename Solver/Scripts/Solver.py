@@ -1,4 +1,5 @@
-from FourQueens import FourQueens
+from FourQueens import *
+from Queen import *
 
 class Solver():
 

@@ -4,6 +4,8 @@ import random
 row = []
 positions = []
 
+print("Initialized Board")
+
 randomSamples = random.sample(range(25), 12)
 whiteSamples = randomSamples[:6]
 blackSamples = randomSamples[6:]
@@ -11,12 +13,12 @@ blackSamples = randomSamples[6:]
 list = []
 for i in range(25):
     if i in whiteSamples:
-        list += ["white"]
+        list += ["w"]
     else:
         if i in blackSamples:
-            list += ["black"]
+            list += ["b"]
         else:
-            list += ["     "]
+            list += [""]
 
 for element in list:
     row += [element]
@@ -25,7 +27,6 @@ for element in list:
         row = []
 
 print("Random board")
-for row in positions:
-    print(["     " if i == "" else i for i in row])
+print(FourQueens(positions))
 
 print(encode(FourQueens(positions)))

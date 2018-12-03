@@ -11,7 +11,7 @@ class Value(Enum):
 
 class FourQueens():
 
-	def __init__(self, state=None, turn="white"):
+	def __init__(self, state=None, turn="w"):
 		if state is None:
 			self.pieces = []
 			for _ in range(5):
@@ -20,19 +20,19 @@ class FourQueens():
 					row = row + [""]
 				self.pieces = self.pieces + [row]
 
-			self.addPiece("black", (0, 0))
-			self.addPiece("black", (0, 2))
-			self.addPiece("black", (2, 0))
-			self.addPiece("black", (4, 0))
-			self.addPiece("black", (1, 4))
-			self.addPiece("black", (3, 4))
+			self.addPiece("b", (0, 0))
+			self.addPiece("b", (0, 2))
+			self.addPiece("b", (2, 0))
+			self.addPiece("b", (4, 0))
+			self.addPiece("b", (1, 4))
+			self.addPiece("b", (3, 4))
 
-			self.addPiece("white", (4, 4))
-			self.addPiece("white", (4, 2))
-			self.addPiece("white", (2, 4))
-			self.addPiece("white", (0, 4))
-			self.addPiece("white", (1, 0))
-			self.addPiece("white", (3, 0))
+			self.addPiece("w", (4, 4))
+			self.addPiece("w", (4, 2))
+			self.addPiece("w", (2, 4))
+			self.addPiece("w", (0, 4))
+			self.addPiece("w", (1, 0))
+			self.addPiece("w", (3, 0))
 
 			self.turn = turn
 			self.winner = ""
@@ -44,6 +44,17 @@ class FourQueens():
 
 	def addPiece(self, player, position):
 		self.pieces[position[0]][position[1]] = player
+
+	def __str__(self):
+		boardStr = ''
+		for row in self.pieces:
+			for piece in row:
+				if not piece:
+					boardStr += "-"
+				else:
+					boardStr += piece
+			boardStr += "\n"
+		return boardStr
 
 	def generateDictionaryMoves(self):
 		i = 0
@@ -82,10 +93,10 @@ class FourQueens():
 
 		self.checkWin(end)
 
-		if self.turn == "white":
-			self.turn = "black"
+		if self.turn == "w":
+			self.turn = "b"
 		else:
-			self.turn = "white"
+			self.turn = "w"
 
 
 	def checkWin(self, end):
