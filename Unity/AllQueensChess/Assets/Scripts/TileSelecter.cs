@@ -46,11 +46,11 @@ public class TileSelecter : MonoBehaviour {
                 if (Input.GetMouseButtonDown(0))
                 {
                     GameObject selectedPiece = GameManager.instance.PieceAtGrid(gridPoint);
-                    //if (GameManager.instance.DoesPieceBelongToCurrentPlayer(selectedPiece))
-                    //{
+                    if (GameManager.instance.DoesPieceBelongToCurrentPlayer(selectedPiece))
+                    {
                         GameManager.instance.SelectPiece(selectedPiece);
                         ExitState(selectedPiece);
-                    //}
+                    }
                 }
                 tileHighlight.transform.position = Geometry.PointFromGrid(gridPoint);
             }
