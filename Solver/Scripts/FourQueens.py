@@ -62,7 +62,7 @@ class FourQueens():
 		queen = Queen()
 		while i < 25:
 			piece = self.pieces[i%5][i//5]
-			if piece:
+			if piece == self.turn:
 				dict[(i%5, i//5)] = (
 					piece,
 					queen.getMoves(self.pieces, (i%5, i//5))
@@ -78,7 +78,7 @@ class FourQueens():
 		queen = Queen()
 		while i < 25:
 			piece = self.pieces[i%5][i//5]
-			if piece:
+			if piece == self.turn:
 				for move in queen.getMoves(self.pieces, (i%5, i//5)):
 					list = list + [((i%5, i//5), move)]
 			i+=1
@@ -91,22 +91,22 @@ class FourQueens():
 		self.pieces[start[0]][start[1]] = ""
 		self.pieces[end[0]][end[1]] = temp
 
-		self.checkWin(end)
+		if self.checkWin(end):
+			print(self.turn, " wins")
 
 		if self.turn == "w":
 			self.turn = "b"
 		else:
 			self.turn = "w"
 
-
 	def checkWin(self, end):
 		"""Note: Only checks if someone has won on a specific position
 		AND has made the last move.
 		"""
 		for direction in lineDirections:
-			i = -4
+			i = -3
 			lineLen = 0
-			while i < 5:
+			while i < 4:
 				x = direction[0] * i + end[0]
 				y = direction[1] * i + end[1]
 				if (x >= 0 and y >= 0 and
@@ -119,6 +119,7 @@ class FourQueens():
 							return True
 					else:
 						lineLen = 0
+				i += 1
 		return False
 
 	def primitive(self):
