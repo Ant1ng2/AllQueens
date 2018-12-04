@@ -1,4 +1,4 @@
-# FourQueens
+# AllQueens
 _Produced by Anthony Ling_
 
 _All major art assets (3D models, libraries with except the 5-by-5 board which was modified from the original chessboard) were taken from [here.](https://www.raywenderlich.com/5441-how-to-make-a-chess-game-with-unity.)_
