@@ -43,10 +43,18 @@ white = randomSamples[:6]
 black = randomSamples[6:]
 
 positions = generateBoard(white, black)
-
 print("Random Board")
 print(FourQueens(positions))
 
-print(FourQueens(positions).serialize())
+board = FourQueens(positions)
+print(board.serialize())
+
+moves = board.generateMoves()
+board.doMove(moves[1])
+
+print("Move")
+print(board)
+
+print(board.serialize())
 
 # print(encode(FourQueens(positions)))

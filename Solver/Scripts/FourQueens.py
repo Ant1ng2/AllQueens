@@ -90,10 +90,10 @@ class FourQueens():
 	def doMove(self, move):
 		start = move[0]
 		end = move[1]
+		self.hash = self.zobrist.hash(self, self.hash, start, end)		
 		temp = self.pieces[start[0]][start[1]]
 		self.pieces[start[0]][start[1]] = ""
 		self.pieces[end[0]][end[1]] = temp
-		self.hash = self.zobrist.hash(self, self.hash, start, end)
 
 		if self.checkWin(end):
 			print(self.turn, " wins")
