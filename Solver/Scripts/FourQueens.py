@@ -1,6 +1,7 @@
 from Queen import Queen
 from enum import Enum
 import math
+from ZobristHash import *
 
 lineDirections = [(0,1), (1,0), (1,1), (1,-1)]
 
@@ -33,17 +34,19 @@ class FourQueens():
 			self.addPiece("w", (0, 4))
 			self.addPiece("w", (1, 0))
 			self.addPiece("w", (3, 0))
-
-			self.turn = turn
-			self.winner = ""
 		else:
 			self.pieces = state
-			self.turn = turn
-			self.winner = ""
-			self.primitive()
+
+		self.turn = turn
+		self.winner = ""
+		self.zobrist = ZobristHash()
+		self.hash = self.zobrist.hash(self)
 
 	def addPiece(self, player, position):
 		self.pieces[position[0]][position[1]] = player
+
+	def getPiece(self, position):
+		return self.pieces[position[0]][position[1]]
 
 	def __str__(self):
 		boardStr = ''
@@ -90,6 +93,7 @@ class FourQueens():
 		temp = self.pieces[start[0]][start[1]]
 		self.pieces[start[0]][start[1]] = ""
 		self.pieces[end[0]][end[1]] = temp
+		self.hash = self.zobrist.hash(self, self.hash, start, end)
 
 		if self.checkWin(end):
 			print(self.turn, " wins")
@@ -115,7 +119,7 @@ class FourQueens():
 					if piece and piece == self.turn:
 						lineLen += 1
 						if lineLen >= 4:
-							self.winner == self.turn
+							self.winner = self.turn
 							return True
 					else:
 						lineLen = 0
@@ -128,93 +132,7 @@ class FourQueens():
 				return Value.Win
 			else:
 				return Value.Lose
-
-		"""
-		for i in range(5):
-			for j in range(5):
-				if self.checkWin((i, j)):
-					if self.pieces[i][j] == self.turn:
-						return Value.Win
-					else:
-						return Value.Lose
-		"""
 		return Value.Undecided
 
 	def serialize(self):
-		return
-
-def encode(game, pieces=None, turn=None):
-	if turn is None:
-		turn = game.turn
-
-	if pieces is None:
-		pieces = game.pieces
-
-	list = []
-	#Encodes the position
-	for i in range(5):
-		for j in range(5):
-			piece = pieces[i][j]
-			list = list + [piece]
-
-	#Combinatorial Number System for spaces and queens
-	k = 1
-	spaces = 0
-	for i, j in enumerate(list):
-		if j:
-			spaces += combine(i, k)
-		k += 1
-
-	#Combinatorial Number System for queen orientations
-	number = 0
-	order = [j for j in list if j]
-	indices = [i for i, j in enumerate(order) if j == turn]
-	for i, j in enumerate(indices):
-		number += combine(j, i+1)
-
-	return space << 10 + number
-
-def decode(mes):
-	number = mes % 0b1111111111
-	spaces = mes >> 10
-
-	order = []
-	k = 6
-	while k > 0:
-		n = 0
-		while (combine(n, k) <= number):
-			n += 1
-		n -= 1
-		c = combine(n, k)
-		number = number - c
-		order = [n] + order
-		k -= 1
-
-	list = []
-	k = 12
-	while k > 0:
-		n = 0
-		while (combine(n, k) <= spaces):
-			n += 1
-		n -= 1
-		c = combine(n, k)
-		spaces = spaces - c
-		list = [n] + list
-		k -= 1
-
-	positions = []
-	row = []
-	for i, j in enumerate(list):
-		if (i%5 == 0):
-			positions = positions + [row]
-			row = []
-		if j and order:
-			row = row + [order[0]]
-			order = order[1:]
-		else:
-			row = row + [""]
-
-	return positions
-
-def combine(n, k):
-	return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
+		return self.hash

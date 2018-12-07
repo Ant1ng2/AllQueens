@@ -1,4 +1,5 @@
 from FourQueens import *
+from ZobristHash import *
 import random
 
 def generateBoard(white, black):
@@ -45,5 +46,7 @@ positions = generateBoard(white, black)
 
 print("Random Board")
 print(FourQueens(positions))
+
+print(FourQueens(positions).serialize())
 
 # print(encode(FourQueens(positions)))
