@@ -39,14 +39,28 @@ class FourQueens():
 
 		self.turn = turn
 		self.winner = ""
-		self.zobrist = ZobristHash()
-		self.hash = self.zobrist.hash(self)
 
 	def addPiece(self, player, position):
 		self.pieces[position[0]][position[1]] = player
 
 	def getPiece(self, position):
 		return self.pieces[position[0]][position[1]]
+
+	def rotate(self):
+		pieces = []
+		for i in list(zip(*reversed(self.pieces))):
+			pieces += [list(i)]
+		self.pieces = pieces
+
+	def value(self):
+		total = 0
+		i = 0
+		for row in self.pieces:
+			for element in row:
+				if element:
+					total += 2**i
+				i+=1
+		return total
 
 	def __str__(self):
 		boardStr = ''
@@ -90,7 +104,6 @@ class FourQueens():
 	def doMove(self, move):
 		start = move[0]
 		end = move[1]
-		self.hash = self.zobrist.hash(self, self.hash, start, end)		
 		temp = self.pieces[start[0]][start[1]]
 		self.pieces[start[0]][start[1]] = ""
 		self.pieces[end[0]][end[1]] = temp
@@ -135,4 +148,13 @@ class FourQueens():
 		return Value.Undecided
 
 	def serialize(self):
-		return self.hash
+		max = self.value()
+		pieces = self.pieces
+
+		for _ in range(3):
+			self.rotate()
+			if max < self.value():
+				max = self.value()
+				pieces = self.pieces
+		self.pieces = pieces
+		return ZobristHash().hash(self)

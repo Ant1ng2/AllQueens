@@ -19,7 +19,7 @@ class Solver():
 				return FourQueens.Value.Win # Not necessarily traverse all subtree
 		return FourQueens.Value.Lose
 
-	# this one will end when find the anther is Win
+	# this one will end when find the another is Win
 	def solve(self, game):
 		serialized = game.serialize()
 		if serialized in self.memory:
