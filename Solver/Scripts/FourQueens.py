@@ -10,8 +10,10 @@ class Value(Enum):
 	Lose = "Lose"
 	Undecided = "Undecided"
 
-class FourQueens():
+def main():
+	game = FourQueens()
 
+class FourQueens():
 	def __init__(self, state=None, turn="w"):
 		if state is None:
 			self.pieces = []
@@ -46,6 +48,9 @@ class FourQueens():
 	def getPiece(self, position):
 		return self.pieces[position[0]][position[1]]
 
+	def getTurn(self):
+		return self.turn
+
 	def rotate(self):
 		pieces = []
 		for i in list(zip(*reversed(self.pieces))):
@@ -63,6 +68,9 @@ class FourQueens():
 		return total
 
 	def __str__(self):
+		self.rotate()
+		self.rotate()
+		self.rotate()
 		boardStr = ''
 		for row in self.pieces:
 			for piece in row:
@@ -71,6 +79,7 @@ class FourQueens():
 				else:
 					boardStr += piece
 			boardStr += "\n"
+		self.rotate()
 		return boardStr
 
 	def generateDictionaryMoves(self):
@@ -110,6 +119,7 @@ class FourQueens():
 
 		if self.checkWin(end):
 			print(self.turn, " wins")
+			self.winner = self.turn
 
 		if self.turn == "w":
 			self.turn = "b"
@@ -158,3 +168,6 @@ class FourQueens():
 				pieces = self.pieces
 		self.pieces = pieces
 		return ZobristHash().hash(self)
+
+if __name__ == "__main__":
+	main()
