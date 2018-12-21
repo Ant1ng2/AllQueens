@@ -13,7 +13,7 @@ class GameManger:
             print("Move Piece where: ")
             finish = tuple(int(x.strip()) for x in input().split(','))
 
-            self.game.doMove((start, finish))
+            self.game = self.game.doMove((start, finish))
             print("----------------------------")
 
 

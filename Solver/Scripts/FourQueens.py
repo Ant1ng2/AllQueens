@@ -14,7 +14,7 @@ def main():
 	game = FourQueens()
 
 class FourQueens():
-	def __init__(self, state=None, turn="w"):
+	def __init__(self, state=None, turn="w", hash=ZobristHash(), winner=""):
 		if state is None:
 			self.pieces = []
 			for _ in range(5):
@@ -40,7 +40,8 @@ class FourQueens():
 			self.pieces = state
 
 		self.turn = turn
-		self.winner = ""
+		self.winner = winner
+		self.hash = hash
 
 	def addPiece(self, player, position):
 		self.pieces[position[0]][position[1]] = player
@@ -113,18 +114,21 @@ class FourQueens():
 	def doMove(self, move):
 		start = move[0]
 		end = move[1]
-		temp = self.pieces[start[0]][start[1]]
-		self.pieces[start[0]][start[1]] = ""
-		self.pieces[end[0]][end[1]] = temp
+		winner = ""
+		pieces = [[piece for piece in row] for row in self.pieces]
+		temp = pieces[start[0]][start[1]]
+		pieces[start[0]][start[1]] = ""
+		pieces[end[0]][end[1]] = temp
 
 		if self.checkWin(end):
-			print(self.turn, " wins")
-			self.winner = self.turn
+			winner = self.turn
 
 		if self.turn == "w":
-			self.turn = "b"
+			turn = "b"
 		else:
-			self.turn = "w"
+			turn = "w"
+
+		return FourQueens(pieces, turn, self.hash, winner)
 
 	def checkWin(self, end):
 		"""Note: Only checks if someone has won on a specific position
@@ -142,7 +146,6 @@ class FourQueens():
 					if piece and piece == self.turn:
 						lineLen += 1
 						if lineLen >= 4:
-							self.winner = self.turn
 							return True
 					else:
 						lineLen = 0
@@ -167,7 +170,7 @@ class FourQueens():
 				max = self.value()
 				pieces = self.pieces
 		self.pieces = pieces
-		return ZobristHash().hash(self)
+		return self.hash.hash(self)
 
 if __name__ == "__main__":
 	main()
