@@ -120,7 +120,7 @@ class FourQueens():
 		pieces[start[0]][start[1]] = ""
 		pieces[end[0]][end[1]] = temp
 
-		if self.checkWin(end):
+		if self.checkWin(pieces, end):
 			winner = self.turn
 
 		if self.turn == "w":
@@ -130,7 +130,7 @@ class FourQueens():
 
 		return FourQueens(pieces, turn, self.hash, winner)
 
-	def checkWin(self, end):
+	def checkWin(self, pieces, end):
 		"""Note: Only checks if someone has won on a specific position
 		AND has made the last move.
 		"""
@@ -142,7 +142,7 @@ class FourQueens():
 				y = direction[1] * i + end[1]
 				if (x >= 0 and y >= 0 and
 					x < 5 and y < 5):
-					piece = self.pieces[x][y]
+					piece = pieces[x][y]
 					if piece and piece == self.turn:
 						lineLen += 1
 						if lineLen >= 4:
