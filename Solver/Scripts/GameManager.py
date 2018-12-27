@@ -1,13 +1,13 @@
 from FourQueens import *
-from ChessSolver import Solver
+import ChessSolver
 
 class GameManger:
 
     def __init__(self, game, solver=None):
         self.game = game
         self.solver = solver
-        if solver:
-            self.solver.solveTranverse(self.game)
+        #if solver:
+            #self.solver.solveTraverse(self.game)
 
     def play(self):
         while self.game.primitive() == Value.Undecided:
@@ -27,7 +27,7 @@ class GameManger:
                 self.game = self.game.doMove(self.solver.generateMove(self.game))
         print(self.game)
         print("Game Over")
-        
+
 game = FourQueens()
-gameManager = GameManger(game)
+gameManager = GameManger(game, ChessSolver.Solver())
 gameManager.play()

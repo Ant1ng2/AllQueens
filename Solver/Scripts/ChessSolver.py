@@ -17,16 +17,16 @@ class Solver():
         if serialized in self.memory:
             return self.memory[serialized]
         primitive = game.primitive()
+        self.memory[serialized] = primitive
         if primitive != Value.Undecided:
-            self.memory[serialized] = primitive
             return primitive
         for move in game.generateMoves():
             newFourQueens = game.doMove(move)
-            if self.solve(newFourQueens) == FourQueens.Value.Lose:
-                self.memory[serialized] = FourQueens.Value.Win
-                return FourQueens.Value.Win # Not necessarily traverse all subtree
-            self.memory[serialized] = FourQueens.Value.Lose
-        return FourQueens.Value.Lose
+            if self.solve(newFourQueens) == Value.Lose:
+                self.memory[serialized] = Value.Win
+                return Value.Win # Not necessarily traverse all subtree
+            self.memory[serialized] = Value.Lose
+        return Value.Lose
 
 	# this one will traverse all subtree
     def solveTraverse(self, game):
@@ -35,23 +35,23 @@ class Solver():
         if serialized in self.memory:
             return self.memory[serialized]
         primitive = game.primitive()
+        self.memory[serialized] = primitive
         if primitive != Value.Undecided:
-            self.memory[serialized] = primitive
             return primitive
         for move in game.generateMoves():
             newFourQueens = game.doMove(move)
-            if self.solve(newFourQueens) == FourQueens.Value.Lose:
-                self.memory[serialized] = FourQueens.Value.Win
+            if self.solve(newFourQueens) == Value.Lose:
+                self.memory[serialized] = Value.Win
                 winFlag = True
             if not winFlag:
-                self.memory[serialized] = FourQueens.Value.Lose
-        return FourQueens.Value.Win if winFlag else FourQueens.Value.Lose
+                self.memory[serialized] = Value.Lose
+        return Value.Win if winFlag else Value.Lose
 
     # Can be executed through precomputation or computation per move
     def generateMove(self, game):
-        if self.solve(game) == FourQueens.Value.Lose:
+        if self.solve(game) == Value.Lose:
             return game.generateMoves()[0]
         validMoves = [
-            move for move in game.generateMoves() if self.solve(game.doMove(move) == FourQueens.Value.Lose)
+            move for move in game.generateMoves() if self.solve(game.doMove(move) == Value.Lose)
         ]
         return validMoves[0]

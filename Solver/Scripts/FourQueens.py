@@ -52,35 +52,16 @@ class FourQueens():
 	def getTurn(self):
 		return self.turn
 
-	def rotate(self):
-		pieces = []
-		for i in list(zip(*reversed(self.pieces))):
-			pieces += [list(i)]
-		self.pieces = pieces
-
-	def value(self):
-		total = 0
-		i = 0
-		for row in self.pieces:
-			for element in row:
-				if element:
-					total += 2**i
-				i+=1
-		return total
-
 	def __str__(self):
-		self.rotate()
-		self.rotate()
-		self.rotate()
+		pieces = rotate(rotate(rotate(self.pieces)))
 		boardStr = ''
-		for row in self.pieces:
+		for row in pieces:
 			for piece in row:
 				if not piece:
 					boardStr += "-"
 				else:
 					boardStr += piece
 			boardStr += "\n"
-		self.rotate()
 		return boardStr
 
 	def generateDictionaryMoves(self):
@@ -163,13 +144,30 @@ class FourQueens():
 	def serialize(self):
 		max = self.value()
 		pieces = self.pieces
+		temp = self.pieces
 
 		for _ in range(3):
-			self.rotate()
-			if max < self.value():
-				max = self.value()
-				pieces = self.pieces
+			temp = rotate(temp)
+			if max < value(pieces):
+				max = value(temp)
+				pieces = temp
 		return self.hash.hash(pieces)
+
+def rotate(board):
+	pieces = []
+	for i in list(zip(*reversed(board))):
+		pieces += [list(i)]
+	return pieces
+
+def value(board):
+	total = 0
+	i = 0
+	for row in board:
+		for element in row:
+			if element:
+				total += 2**i
+			i+=1
+	return total
 
 if __name__ == "__main__":
 	main()
