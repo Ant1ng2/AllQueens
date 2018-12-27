@@ -169,8 +169,7 @@ class FourQueens():
 			if max < self.value():
 				max = self.value()
 				pieces = self.pieces
-		self.pieces = pieces
-		return self.hash.hash(self)
+		return self.hash.hash(pieces)
 
 if __name__ == "__main__":
 	main()

@@ -1,22 +1,33 @@
 from FourQueens import *
+from ChessSolver import Solver
+
 class GameManger:
 
-    def __init__(self, game):
+    def __init__(self, game, solver=None):
         self.game = game
+        self.solver = solver
+        if solver:
+            self.solver.solveTranverse(self.game)
 
     def play(self):
-        while self.game.primitive() != "Undecided":
+        while self.game.primitive() == Value.Undecided:
             print(self.game.getTurn(), "'s turn")
             print(self.game)
-            print("Enter Piece: ")
-            start = tuple(int(x.strip()) for x in input().split(','))
-            print("Move Piece where: ")
-            finish = tuple(int(x.strip()) for x in input().split(','))
-
-            self.game = self.game.doMove((start, finish))
-            print("----------------------------")
-
-
+            if self.game.getTurn() == "w" or not self.solver:
+                print("Enter Piece: ")
+                start = tuple(int(x.strip()) for x in input().split(','))
+                print("Move Piece where: ")
+                finish = tuple(int(x.strip()) for x in input().split(','))
+                if (start, finish) not in self.game.generateMoves():
+                    print("Not a valid move, try again")
+                else:
+                    self.game = self.game.doMove((start, finish))
+                print("----------------------------")
+            else:
+                self.game = self.game.doMove(self.solver.generateMove(self.game))
+        print(self.game)
+        print("Game Over")
+        
 game = FourQueens()
 gameManager = GameManger(game)
 gameManager.play()
