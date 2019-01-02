@@ -142,21 +142,27 @@ class FourQueens():
 		return Value.Undecided
 
 	def serialize(self):
-		max = self.value()
-		pieces = self.pieces
+		max = 0
 		temp = self.pieces
 
-		for _ in range(3):
-			temp = rotate(temp)
-			if max < value(pieces):
-				max = value(temp)
-				pieces = temp
+		for _ in range(2):
+			for _ in range(4):
+				if max < value(temp):
+					max = value(temp)
+					pieces = temp
+				temp = rotate(temp)
+			temp = flip(temp)
 		return self.hash.hash(pieces)
 
 def rotate(board):
 	pieces = []
 	for i in list(zip(*reversed(board))):
 		pieces += [list(i)]
+	return pieces
+
+def flip(board):
+	for i in board:
+		pieces = [i] + pieces
 	return pieces
 
 def value(board):

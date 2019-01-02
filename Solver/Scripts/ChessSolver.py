@@ -13,6 +13,7 @@ class Solver():
 
     # this one will end when it finds the next instance as Win
     def solve(self, game):
+        print(game)
         serialized = game.serialize()
         if serialized in self.memory:
             return self.memory[serialized]
@@ -43,8 +44,8 @@ class Solver():
             if self.solve(newFourQueens) == Value.Lose:
                 self.memory[serialized] = Value.Win
                 winFlag = True
-            if not winFlag:
-                self.memory[serialized] = Value.Lose
+        if not winFlag:
+            self.memory[serialized] = Value.Lose
         return Value.Win if winFlag else Value.Lose
 
     # Can be executed through precomputation or computation per move
