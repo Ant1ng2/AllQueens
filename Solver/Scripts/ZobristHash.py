@@ -10,11 +10,17 @@ class ZobristHash:
                 row.append(random.getrandbits(32))
             self.table += [row]
 
-    def hash(self, board, code=None, start=None, end=None):
-        indices = {
-            "w" : 0,
-            "b" : 1,
-        }
+    def hash(self, board, turn, code=None, start=None, end=None):
+        if turn == "w":
+            indices = {
+                "w" : 0,
+                "b" : 1,
+            }
+        else:
+            indices = {
+                "b" : 0,
+                "w" : 1,
+            }
         if code and start and end:
             j = board[start[0]][start[1]]
             if not j:

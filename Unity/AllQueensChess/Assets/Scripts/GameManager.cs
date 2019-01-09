@@ -1,24 +1,24 @@
 ﻿/*
  * Copyright (c) 2018 Razeware LLC
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
  *
- * Notwithstanding the foregoing, you may not use, copy, modify, merge, publish, 
- * distribute, sublicense, create a derivative work, and/or sell copies of the 
- * Software in any work that is designed, intended, or marketed for pedagogical or 
- * instructional purposes related to programming, coding, application development, 
+ * Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
+ * distribute, sublicense, create a derivative work, and/or sell copies of the
+ * Software in any work that is designed, intended, or marketed for pedagogical or
+ * instructional purposes related to programming, coding, application development,
  * or information technology.  Permission for such use, copying, modification,
- * merger, publication, distribution, sublicensing, creation of derivative works, 
+ * merger, publication, distribution, sublicensing, creation of derivative works,
  * or sale is expressly withheld.
- *    
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
     public Board board;
     public GameObject whiteQueen;
     public GameObject blackQueen;
-    public Text winText; 
+    public Text winText;
 
     private GameObject[,] pieces;
 
@@ -50,6 +50,7 @@ public class GameManager : MonoBehaviour
     private Player black;
     public Player currentPlayer;
     public Player otherPlayer;
+    public Player winner;
 
     protected Vector2Int[] lineDirections = {new Vector2Int(0,1), new Vector2Int(1, 0),
         new Vector2Int(1, 1), new Vector2Int(1, -1)};
@@ -61,7 +62,7 @@ public class GameManager : MonoBehaviour
 
     void Start ()
     {
-        pieces = new GameObject[8, 8];
+        pieces = new GameObject[5, 5];
 
         white = new Player("white", true);
         black = new Player("black", false);
@@ -126,7 +127,7 @@ public class GameManager : MonoBehaviour
 
     public Vector2Int GridForPiece(GameObject piece)
     {
-        for (int i = 0; i < 5; i++) 
+        for (int i = 0; i < 5; i++)
         {
             for (int j = 0; j < 5; j++)
             {
@@ -213,12 +214,34 @@ public class GameManager : MonoBehaviour
         Player tempPlayer = currentPlayer;
         currentPlayer = otherPlayer;
         otherPlayer = tempPlayer;
+    }
 
-        //Vector3 cameraPosition = Camera.main.gameObject.transform.position;
+    // Solver Exclusive methods
 
-        //cameraPosition[2] = -cameraPosition[2];
+    public GameManager(GameObject[,] pieces) {
+        this.pieces = pieces.Clone()
+    }
 
-        //Camera.main.gameObject.transform.position = cameraPosition;
-        //Camera.main.gameObject.transform.Rotate(new Vector3(0, 180), Space.World);
+    public GameManager doMove(List<Vector2Int> move) {
+
+        Vector2Int startGridPoint = move[0];
+
+
+    }
+
+    public List<List<Vector2Int>> generateMoves() {
+        List<List<Vector2Int>> list = new List<List<Vector2Int>>();
+
+        for (int i = 0; i < 25; i++) {
+            Vector2Int start = new Vector2Int(i / 5, i % 5);
+            Piece piece = PieceAtGrid(start);
+
+            if (piece && DoesPieceBelongToCurrentPlayer(piece)) {
+                foreach (Vector2Int end in MovesForPiece(piece)) {
+                    list.Add(new List<Vector2Int> {start, end});
+                }
+            }
+        }
+        return list;
     }
 }

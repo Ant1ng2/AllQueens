@@ -152,7 +152,7 @@ class FourQueens():
 					pieces = temp
 				temp = rotate(temp)
 			temp = flip(temp)
-		return self.hash.hash(pieces)
+		return self.hash.hash(pieces, self.turn)
 
 def rotate(board):
 	pieces = []
