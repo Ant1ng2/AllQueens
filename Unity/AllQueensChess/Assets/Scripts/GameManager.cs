@@ -167,27 +167,30 @@ public class GameManager : MonoBehaviour
         Vector2Int startGridPoint = GridForPiece(piece);
         pieces[startGridPoint.x, startGridPoint.y] = null;
         pieces[gridPoint.x, gridPoint.y] = piece;
-        board.MovePiece(piece, gridPoint);
 
-        foreach (Vector2Int dir in lineDirections) {
-            int lineLen = 0;
-            for (int i = -4; i < 5; i++)
-            {
-                GameObject newPiece = PieceAtGrid(new Vector2Int(dir.x * i + gridPoint.x, dir.y * i + gridPoint.y));
-                if (newPiece && DoesPieceBelongToCurrentPlayer(newPiece))
+        if (board) {
+            board.MovePiece(piece, gridPoint);
+
+            foreach (Vector2Int dir in lineDirections) {
+                int lineLen = 0;
+                for (int i = -4; i < 5; i++)
                 {
-                    lineLen++;
-                    if (lineLen >= 4)
+                    GameObject newPiece = PieceAtGrid(new Vector2Int(dir.x * i + gridPoint.x, dir.y * i + gridPoint.y));
+                    if (newPiece && DoesPieceBelongToCurrentPlayer(newPiece))
                     {
-                        winText.text = currentPlayer.name + " wins!";
-                        Destroy(board.GetComponent<TileSelecter>());
-                        Destroy(board.GetComponent<MoveSelecter>());
-                        return;
+                        lineLen++;
+                        if (lineLen >= 4)
+                        {
+                            winText.text = currentPlayer.name + " wins!";
+                            Destroy(board.GetComponent<TileSelecter>());
+                            Destroy(board.GetComponent<MoveSelecter>());
+                            return;
+                        }
                     }
-                }
-                else
-                {
-                    lineLen = 0;
+                    else
+                    {
+                        lineLen = 0;
+                    }
                 }
             }
         }
@@ -218,15 +221,67 @@ public class GameManager : MonoBehaviour
 
     // Solver Exclusive methods
 
-    public GameManager(GameObject[,] pieces) {
-        this.pieces = pieces.Clone()
+    private GameManager(GameObject[,] pieces, Player currentPlayer, Player otherPlayer, Player white, Player black) {
+        this.pieces = (GameObject[,]) pieces.Clone();
+
+        this.white = white;
+        this.black = black;
+
+        this.currentPlayer = currentPlayer;
+        this.otherPlayer = otherPlayer;
     }
 
     public GameManager doMove(List<Vector2Int> move) {
 
         Vector2Int startGridPoint = move[0];
+        Vector2Int endGridPoint = move[1];
 
+        GameObject startPiece = PieceAtGrid(startGridPoint);
 
+        GameManager newGameManager = new GameManager(pieces, currentPlayer, otherPlayer, white, black);
+        newGameManager.Move(startPiece, endGridPoint);
+        newGameManager.checkWin(endGridPoint);
+        newGameManager.NextPlayer();
+
+        return newGameManager;
+    }
+
+    public int primitive() {
+        if (winner != null) {
+            if (winner == currentPlayer) {
+                return 2;
+            }
+            if (winner == otherPlayer) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    private void checkWin(Vector2Int gridPoint) {
+        if (winner != null) {
+            return;
+        }
+        foreach (Vector2Int dir in lineDirections) {
+            int lineLen = 0;
+            for (int i = -4; i < 5; i++)
+            {
+                GameObject newPiece = PieceAtGrid(new Vector2Int(dir.x * i + gridPoint.x, dir.y * i + gridPoint.y));
+                if (newPiece && DoesPieceBelongToCurrentPlayer(newPiece))
+                {
+                    lineLen++;
+                    if (lineLen >= 4)
+                    {
+                        winner = currentPlayer;
+                        return;
+                    }
+                }
+                else
+                {
+                    lineLen = 0;
+                }
+            }
+        }
     }
 
     public List<List<Vector2Int>> generateMoves() {
@@ -234,7 +289,7 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < 25; i++) {
             Vector2Int start = new Vector2Int(i / 5, i % 5);
-            Piece piece = PieceAtGrid(start);
+            GameObject piece = PieceAtGrid(start);
 
             if (piece && DoesPieceBelongToCurrentPlayer(piece)) {
                 foreach (Vector2Int end in MovesForPiece(piece)) {
