@@ -43,6 +43,8 @@ public class GameManager : MonoBehaviour
     public GameObject whiteQueen;
     public GameObject blackQueen;
     public Text winText;
+    public Text hashText;
+    public Text boardString;
 
     private GameObject[,] pieces;
 
@@ -55,12 +57,17 @@ public class GameManager : MonoBehaviour
     protected Vector2Int[] lineDirections = {new Vector2Int(0,1), new Vector2Int(1, 0),
         new Vector2Int(1, 1), new Vector2Int(1, -1)};
 
+    public GameManager()
+    {
+        Start();
+    }
+
     void Awake()
     {
         instance = this;
     }
 
-    void Start ()
+    void Start()
     {
         pieces = new GameObject[5, 5];
 
@@ -71,6 +78,8 @@ public class GameManager : MonoBehaviour
         otherPlayer = black;
 
         InitialSetup();
+        hashText.text = Serialize().ToString();
+        boardString.text = BoardToString(pieces);
     }
 
     private void InitialSetup()
@@ -88,6 +97,7 @@ public class GameManager : MonoBehaviour
         AddPiece(whiteQueen, white, 0, 4);
         AddPiece(whiteQueen, white, 1, 0);
         AddPiece(whiteQueen, white, 3, 0);
+        CombinatorialHash.SetPieces(white.pieces, black.pieces);
     }
 
     public void AddPiece(GameObject prefab, Player player, int col, int row)
@@ -168,7 +178,7 @@ public class GameManager : MonoBehaviour
         pieces[startGridPoint.x, startGridPoint.y] = null;
         pieces[gridPoint.x, gridPoint.y] = piece;
 
-        if (board) {
+        if (board != null) {
             board.MovePiece(piece, gridPoint);
 
             foreach (Vector2Int dir in lineDirections) {
@@ -194,6 +204,9 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+        ulong hash = Serialize();
+        hashText.text = hash.ToString();
+        boardString.text = BoardToString(Deserialize(hash));
     }
 
     public List<Vector2Int> MovesForPiece(GameObject pieceObject)
@@ -219,13 +232,39 @@ public class GameManager : MonoBehaviour
         otherPlayer = tempPlayer;
     }
 
+    public string BoardToString(GameObject[,] pieces)
+    {
+        string boardString = "";
+        for (int col = 4; col >= 0; col--)
+        {
+            for (int row = 0; row < 5; row++)
+            {
+                if (white.pieces.Contains(pieces[row, col]))
+                {
+                    boardString += "■";
+                }
+                else if (black.pieces.Contains(pieces[row, col]))
+                {
+                    boardString += "□";
+                }
+                else
+                {
+                    boardString += "▪ ";
+                }
+            }
+            boardString += "\n";
+        }
+        return boardString;
+    }
+
     // Solver Exclusive methods
 
-    private GameManager(GameObject[,] pieces, Player currentPlayer, Player otherPlayer, Player white, Player black) {
+    private GameManager(GameObject[,] pieces, Player currentPlayer, Player otherPlayer, Player white, Player black, Player winner) {
         this.pieces = (GameObject[,]) pieces.Clone();
 
         this.white = white;
         this.black = black;
+        this.winner = winner;
 
         this.currentPlayer = currentPlayer;
         this.otherPlayer = otherPlayer;
@@ -238,7 +277,7 @@ public class GameManager : MonoBehaviour
 
         GameObject startPiece = PieceAtGrid(startGridPoint);
 
-        GameManager newGameManager = new GameManager(pieces, currentPlayer, otherPlayer, white, black);
+        GameManager newGameManager = new GameManager(pieces, currentPlayer, otherPlayer, white, black, winner);
         newGameManager.Move(startPiece, endGridPoint);
         newGameManager.checkWin(endGridPoint);
         newGameManager.NextPlayer();
@@ -246,7 +285,27 @@ public class GameManager : MonoBehaviour
         return newGameManager;
     }
 
-    public int primitive() {
+    public List<List<Vector2Int>> generateMoves()
+    {
+        List<List<Vector2Int>> list = new List<List<Vector2Int>>();
+
+        for (int i = 0; i < 25; i++)
+        {
+            Vector2Int start = new Vector2Int(i / 5, i % 5);
+            GameObject piece = PieceAtGrid(start);
+
+            if (piece && DoesPieceBelongToCurrentPlayer(piece))
+            {
+                foreach (Vector2Int end in MovesForPiece(piece))
+                {
+                    list.Add(new List<Vector2Int> { start, end });
+                }
+            }
+        }
+        return list;
+    }
+
+    public byte primitive() {
         if (winner != null) {
             if (winner == currentPlayer) {
                 return 2;
@@ -284,19 +343,77 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public List<List<Vector2Int>> generateMoves() {
-        List<List<Vector2Int>> list = new List<List<Vector2Int>>();
+    private GameObject[,] rotate(GameObject[,] src)
+    {
+        int width;
+        int height;
+        GameObject[,] dst;
 
-        for (int i = 0; i < 25; i++) {
-            Vector2Int start = new Vector2Int(i / 5, i % 5);
-            GameObject piece = PieceAtGrid(start);
+        width = src.GetUpperBound(0) + 1;
+        height = src.GetUpperBound(1) + 1;
+        dst = new GameObject[height, width];
 
-            if (piece && DoesPieceBelongToCurrentPlayer(piece)) {
-                foreach (Vector2Int end in MovesForPiece(piece)) {
-                    list.Add(new List<Vector2Int> {start, end});
+        for (int row = 0; row < height; row++)
+        {
+            for (int col = 0; col < width; col++)
+            {
+                int newRow;
+                int newCol;
+
+                newRow = col;
+                newCol = height - (row + 1);
+
+                dst[newCol, newRow] = src[col, row];
+            }
+        }
+        return dst;
+    }
+
+    private GameObject[,] flip(GameObject[,] src)
+    {
+        int width;
+        int height;
+        GameObject[,] dst;
+
+        width = src.GetUpperBound(0) + 1;
+        height = src.GetUpperBound(1) + 1;
+        dst = new GameObject[height, width];
+
+        for (int row = 0; row < height; row++)
+        {
+            for (int col = 0; col < width; col++)
+            {
+                dst[col, row] = src[col, height - 1 - row];
+            }
+        }
+        return dst;
+    }
+
+    public ulong Serialize()
+    {
+        ulong min = ulong.MaxValue;
+
+        GameObject[,] temp = pieces;
+
+        //Removes symmetries
+        for (int i = 0; i < 4; i++)
+        {
+            temp = rotate(temp);
+            for (int j = 0; j < 2; j++)
+            {
+                temp = flip(temp);
+                ulong value = CombinatorialHash.Hash(temp, currentPlayer);
+                if (CombinatorialHash.Hash(temp, currentPlayer) <= min)
+                {
+                    min = value;
                 }
             }
         }
-        return list;
+        return min;
+    }
+
+    public GameObject[,] Deserialize(ulong hash)
+    {
+        return CombinatorialHash.Unhash(hash);
     }
 }
