@@ -651,7 +651,7 @@ MonoBehaviour:
   whiteQueen: {fileID: 1620457606779524, guid: 7ee835217c594994cad9450292f2da9e, type: 2}
   blackQueen: {fileID: 1672422538577384, guid: 165a2fa33ff37da4c99a44156848c282, type: 2}
   winText: {fileID: 1831625676}
-  hash: {fileID: 559507928}
+  hashText: {fileID: 559507928}
   boardString: {fileID: 604514758}
 --- !u!4 &1334294538
 Transform:

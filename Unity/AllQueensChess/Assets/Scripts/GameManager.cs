@@ -78,8 +78,9 @@ public class GameManager : MonoBehaviour
         otherPlayer = black;
 
         InitialSetup();
+
         hashText.text = Serialize().ToString();
-        boardString.text = BoardToString(pieces);
+        boardString.text = BoardToString(Deserialize(Serialize()));
     }
 
     private void InitialSetup()
@@ -97,7 +98,6 @@ public class GameManager : MonoBehaviour
         AddPiece(whiteQueen, white, 0, 4);
         AddPiece(whiteQueen, white, 1, 0);
         AddPiece(whiteQueen, white, 3, 0);
-        CombinatorialHash.SetPieces(white.pieces, black.pieces);
     }
 
     public void AddPiece(GameObject prefab, Player player, int col, int row)
@@ -391,7 +391,8 @@ public class GameManager : MonoBehaviour
 
     public ulong Serialize()
     {
-        ulong min = ulong.MaxValue;
+        return CombinatorialHash.Hash(pieces, currentPlayer);
+        ulong min = uint.MaxValue;
 
         GameObject[,] temp = pieces;
 
@@ -414,6 +415,6 @@ public class GameManager : MonoBehaviour
 
     public GameObject[,] Deserialize(ulong hash)
     {
-        return CombinatorialHash.Unhash(hash);
+        return CombinatorialHash.Unhash(hash, currentPlayer.pieces, otherPlayer.pieces);
     }
 }
