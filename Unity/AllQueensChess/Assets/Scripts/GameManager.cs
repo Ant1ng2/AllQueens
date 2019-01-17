@@ -232,18 +232,18 @@ public class GameManager : MonoBehaviour
         otherPlayer = tempPlayer;
     }
 
-    public string BoardToString(GameObject[,] pieces)
+    public string BoardToString(GameManager pieces)
     {
         string boardString = "";
         for (int col = 4; col >= 0; col--)
         {
             for (int row = 0; row < 5; row++)
             {
-                if (white.pieces.Contains(pieces[row, col]))
+                if (white.pieces.Contains(pieces.pieces[row, col]))
                 {
                     boardString += "■";
                 }
-                else if (black.pieces.Contains(pieces[row, col]))
+                else if (black.pieces.Contains(pieces.pieces[row, col]))
                 {
                     boardString += "□";
                 }
@@ -369,30 +369,25 @@ public class GameManager : MonoBehaviour
         return dst;
     }
 
-    private GameObject[,] flip(GameObject[,] src)
+    private GameObject[,] flip(GameObject[,] arrayToFlip)
     {
-        int width;
-        int height;
-        GameObject[,] dst;
+        int rows = arrayToFlip.GetLength(0);
+        int columns = arrayToFlip.GetLength(1);
+        GameObject[,] flippedArray = new GameObject[rows, columns];
 
-        width = src.GetUpperBound(0) + 1;
-        height = src.GetUpperBound(1) + 1;
-        dst = new GameObject[height, width];
-
-        for (int row = 0; row < height; row++)
+        for (int i = 0; i < rows; i++)
         {
-            for (int col = 0; col < width; col++)
+            for (int j = 0; j < columns; j++)
             {
-                dst[col, row] = src[col, height - 1 - row];
+                flippedArray[i, j] = arrayToFlip[(rows - 1) - i, j];
             }
         }
-        return dst;
+        return flippedArray;
     }
 
     public ulong Serialize()
     {
-        return CombinatorialHash.Hash(pieces, currentPlayer);
-        ulong min = uint.MaxValue;
+        ulong min = ulong.MaxValue;
 
         GameObject[,] temp = pieces;
 
@@ -404,7 +399,7 @@ public class GameManager : MonoBehaviour
             {
                 temp = flip(temp);
                 ulong value = CombinatorialHash.Hash(temp, currentPlayer);
-                if (CombinatorialHash.Hash(temp, currentPlayer) <= min)
+                if (value <= min)
                 {
                     min = value;
                 }
@@ -413,8 +408,9 @@ public class GameManager : MonoBehaviour
         return min;
     }
 
-    public GameObject[,] Deserialize(ulong hash)
+    public GameManager Deserialize(ulong hash)
     {
-        return CombinatorialHash.Unhash(hash, currentPlayer.pieces, otherPlayer.pieces);
+        GameObject[,] pieces = CombinatorialHash.Unhash(hash, black.pieces, white.pieces);
+        return new GameManager(pieces, otherPlayer, currentPlayer, black, white, null);
     }
 }

@@ -22,8 +22,10 @@ public static class CombinatorialHash
     public static ulong Hash(GameObject[,] board, Player turn)
     {
         uint hashPieces = 0;
+        uint hashColors = 0;
 
         int l = 12;
+        int k = 6;
 
         for (int i = 0; i < 25; i++)
         {
@@ -32,26 +34,46 @@ public static class CombinatorialHash
             {
                 hashPieces += Choose(24 - i, l);
                 l--;
+                if (turn.pieces.Contains(j))
+                {
+                    hashColors += Choose(l, k);
+                    k--;
+                }
             }
         }
-        return (ulong) hashPieces << 32;
+        return ((ulong) hashPieces << 32) | ((ulong) hashColors);
     }
 
     public static GameObject[,] Unhash(ulong hash, List<GameObject> current, List<GameObject> other)
     {
-        hash = hash >> 32;
+        uint hashPieces = (uint) (hash >> 32);
+        uint hashColors = (uint)(hash & uint.MaxValue);
+
         GameObject[,] board = new GameObject[5, 5];
 
         int l = 12;
+        int k = 6;
+        int f = 6;
 
         for (int i = 0; i < 25; i++)
         {
             uint value = Choose(24 - i, l);
-            if (hash >= value)
+            if (hashPieces >= value)
             {
-                hash -= value;
+                hashPieces -= value;
                 l--;
-                board[i % 5, i / 5] = current[0];
+                value = Choose(l, k);
+                if (hashColors >= value)
+                {
+                    hashColors -= value;
+                    k--;
+                    board[i % 5, i / 5] = current[k];
+                }
+                else
+                {
+                    f--;
+                    board[i % 5, i / 5] = other[f];
+                }
             }
         }
         return board;

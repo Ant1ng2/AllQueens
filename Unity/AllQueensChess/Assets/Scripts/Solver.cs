@@ -22,7 +22,7 @@ public class Solver {
         return Memory[serialized];
     }
 
-    /*private byte Solve(GameManager state)
+    private byte Solve(GameManager state)
     {
         bool winFlag = false;
         uint serialized = state.serialize();
@@ -38,5 +38,4 @@ public class Solver {
         }
 
     }
-    */
 }
