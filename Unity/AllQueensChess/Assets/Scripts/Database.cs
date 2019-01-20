@@ -11,6 +11,14 @@ public static class Database
     private static string conn = "URI=file:" + Application.dataPath + "/Plugins/Database.db"; //Path to the database
     private static IDbConnection dbconn = (IDbConnection)new SqliteConnection(conn);
 
+    public static void CreateTable()
+    {
+        IDbCommand dbcmd = dbconn.CreateCommand();
+        string sqlQuery = "CREATE TABLE Database (ID INTEGER NOT NULL UNIQUE, Value INTEGER, PRIMARY KEY(ID));";
+        dbcmd.CommandText = sqlQuery;
+        dbcmd.ExecuteNonQuery();
+    }
+
     public static void Open()
     {
         dbconn.Open();

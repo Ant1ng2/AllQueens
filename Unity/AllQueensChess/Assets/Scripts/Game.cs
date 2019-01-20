@@ -95,9 +95,9 @@ public class Game
     {
         if (gridPoint.x >= 0 && gridPoint.x < 5 && gridPoint.y >= 0 && gridPoint.y < 5)
         {
-            return null;
+            return pieces[gridPoint.x, gridPoint.y];
         }
-        return pieces[gridPoint.x, gridPoint.y];
+        return null;
     }
 
     public bool FriendlyPieceAt(Vector2Int gridPoint)
@@ -112,7 +112,7 @@ public class Game
         return pieces[gridPoint.x, gridPoint.y] == currentTurn;
     }
 
-    private bool DoesGridPointBelongToPlayer(Vector2Int gridPoint, string player)
+    public bool DoesGridPointBelongToPlayer(Vector2Int gridPoint, string player)
     {
         return (PieceAtGrid(gridPoint) != null && PieceAtGrid(gridPoint) == player);
     }
@@ -193,13 +193,74 @@ public class Game
         return boardString;
     }
 
-    public ulong Serialize(Game game)
+    public ulong Serialize()
     {
-        return 0;
+        ulong min = ulong.MaxValue;
+
+        string[,] temp = pieces;
+
+        //Removes symmetries
+        for (int i = 0; i < 4; i++)
+        {
+            temp = rotate(temp);
+            for (int j = 0; j < 2; j++)
+            {
+                temp = flip(temp);
+                ulong value = CombinatorialHash.HashString(pieces, currentTurn);
+                if (value <= min)
+                {
+                    min = value;
+                }
+            }
+        }
+        return min;
     }
 
     public static Game Deserialize(ulong hash)
     {
-        return null;
+        string[,] board = CombinatorialHash.UnhashString(hash, white, black);
+        return new Game(board, white);
+    }
+
+    private static string[,] rotate(string[,] src)
+    {
+        int width;
+        int height;
+        string[,] dst;
+
+        width = src.GetUpperBound(0) + 1;
+        height = src.GetUpperBound(1) + 1;
+        dst = new string[height, width];
+
+        for (int row = 0; row < height; row++)
+        {
+            for (int col = 0; col < width; col++)
+            {
+                int newRow;
+                int newCol;
+
+                newRow = col;
+                newCol = height - (row + 1);
+
+                dst[newCol, newRow] = src[col, row];
+            }
+        }
+        return dst;
+    }
+
+    private static string[,] flip(string[,] arrayToFlip)
+    {
+        int rows = arrayToFlip.GetLength(0);
+        int columns = arrayToFlip.GetLength(1);
+        string[,] flippedArray = new string[rows, columns];
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                flippedArray[i, j] = arrayToFlip[(rows - 1) - i, j];
+            }
+        }
+        return flippedArray;
     }
 }

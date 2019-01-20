@@ -31,6 +31,7 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -42,9 +43,13 @@ public class GameManager : MonoBehaviour
     public Board board;
     public GameObject whiteQueen;
     public GameObject blackQueen;
+
     public Text winText;
     public Text hashText;
+    public Text hashConfirmationText;
     public Text boardString;
+    public Text gameBoardString;
+    public InputField field;
 
     private GameObject[,] pieces;
 
@@ -54,13 +59,10 @@ public class GameManager : MonoBehaviour
     public Player otherPlayer;
     public Player winner;
 
+    private Game game = new Game();
+
     protected Vector2Int[] lineDirections = {new Vector2Int(0,1), new Vector2Int(1, 0),
         new Vector2Int(1, 1), new Vector2Int(1, -1)};
-
-    public GameManager()
-    {
-        Start();
-    }
 
     void Awake()
     {
@@ -69,6 +71,27 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        ClearBoard();
+
+        InitialSetup();
+        SetText();
+    }
+
+    private void ClearBoard()
+    {
+        if (pieces != null)
+        {
+            for (int i = 0; i < 25; i++)
+            {
+                GameObject piece = pieces[i % 5, i / 5];
+                if (piece != null)
+                {
+                    Destroy(piece);
+                }
+            }
+
+        }
+
         pieces = new GameObject[5, 5];
 
         white = new Player("white", true);
@@ -76,38 +99,58 @@ public class GameManager : MonoBehaviour
 
         currentPlayer = white;
         otherPlayer = black;
+    }
 
-        InitialSetup();
+    public void Hashify()
+    {
+        ClearBoard();
+        string[,] boardString = CombinatorialHash.UnhashString(Convert.ToUInt64(field.text), "w", "b");
+        for (int i = 0; i < 25; i++)
+        {
+            if (boardString[i % 5, i / 5] == "w")
+            {
+                AddPiece(whiteQueen, white, i % 5, i / 5);
+            }
+            if (boardString[i % 5, i / 5] == "b")
+            {
+                AddPiece(blackQueen, black, i % 5, i / 5);
+            }
+        }
+        SetText();
+    }
 
-        hashText.text = Serialize().ToString();
-        boardString.text = BoardToString(Deserialize(Serialize()));
+    private void SetText()
+    {
+        ulong hash = Serialize();
+        hashText.text = hash.ToString();
+        game = Game.Deserialize(hash);
+        boardString.text = game.ToString();
+
+        ulong gameHash = game.Serialize();
+        hashConfirmationText.text = gameHash.ToString();
+        gameBoardString.text = Game.Deserialize(gameHash).ToString();
     }
 
     private void InitialSetup()
     {
-        AddPiece(blackQueen, black, 0, 0);
-        AddPiece(blackQueen, black, 0, 2);
-        AddPiece(blackQueen, black, 2, 0);
-        AddPiece(blackQueen, black, 4, 0);
-        AddPiece(blackQueen, black, 1, 4);
-        AddPiece(blackQueen, black, 3, 4);
-
-        AddPiece(whiteQueen, white, 4, 4);
-        AddPiece(whiteQueen, white, 4, 2);
-        AddPiece(whiteQueen, white, 2, 4);
-        AddPiece(whiteQueen, white, 0, 4);
-        AddPiece(whiteQueen, white, 1, 0);
-        AddPiece(whiteQueen, white, 3, 0);
+        for (int i = 0; i < 25; i++)
+        {
+            if (game.DoesGridPointBelongToPlayer(new Vector2Int(i % 5, i / 5), "b"))
+            {
+                AddPiece(blackQueen, black, i % 5, i / 5);
+            }
+            if (game.DoesGridPointBelongToPlayer(new Vector2Int(i % 5, i / 5), "w"))
+            {
+                AddPiece(whiteQueen, white, i % 5, i / 5);
+            }
+        }
     }
 
     public void AddPiece(GameObject prefab, Player player, int col, int row)
     {
-        if (board != null)
-        {
-            GameObject pieceObject = board.AddPiece(prefab, col, row);
-            player.pieces.Add(pieceObject);
-            pieces[col, row] = pieceObject;
-        }
+        GameObject pieceObject = board.AddPiece(prefab, col, row);
+        player.pieces.Add(pieceObject);
+        pieces[col, row] = pieceObject;
     }
 
     public void SelectPieceAtGrid(Vector2Int gridPoint)
@@ -181,35 +224,30 @@ public class GameManager : MonoBehaviour
         pieces[startGridPoint.x, startGridPoint.y] = null;
         pieces[gridPoint.x, gridPoint.y] = piece;
 
-        if (board != null) {
-            board.MovePiece(piece, gridPoint);
+        board.MovePiece(piece, gridPoint);
 
-            foreach (Vector2Int dir in lineDirections) {
-                int lineLen = 0;
-                for (int i = -4; i < 5; i++)
+        foreach (Vector2Int dir in lineDirections) {
+            int lineLen = 0;
+            for (int i = -4; i < 5; i++)
+            {
+                GameObject newPiece = PieceAtGrid(new Vector2Int(dir.x * i + gridPoint.x, dir.y * i + gridPoint.y));
+                if (newPiece && DoesPieceBelongToCurrentPlayer(newPiece))
                 {
-                    GameObject newPiece = PieceAtGrid(new Vector2Int(dir.x * i + gridPoint.x, dir.y * i + gridPoint.y));
-                    if (newPiece && DoesPieceBelongToCurrentPlayer(newPiece))
+                    lineLen++;
+                    if (lineLen >= 4)
                     {
-                        lineLen++;
-                        if (lineLen >= 4)
-                        {
-                            winText.text = currentPlayer.name + " wins!";
-                            Destroy(board.GetComponent<TileSelecter>());
-                            Destroy(board.GetComponent<MoveSelecter>());
-                            return;
-                        }
+                        winText.text = currentPlayer.name + " wins!";
+                        Destroy(board.GetComponent<TileSelecter>());
+                        Destroy(board.GetComponent<MoveSelecter>());
+                        return;
                     }
-                    else
-                    {
-                        lineLen = 0;
-                    }
+                }
+                else
+                {
+                    lineLen = 0;
                 }
             }
         }
-        ulong hash = Serialize();
-        hashText.text = hash.ToString();
-        boardString.text = BoardToString(Deserialize(hash));
     }
 
     public List<Vector2Int> MovesForPiece(GameObject pieceObject)
@@ -233,115 +271,7 @@ public class GameManager : MonoBehaviour
         Player tempPlayer = currentPlayer;
         currentPlayer = otherPlayer;
         otherPlayer = tempPlayer;
-    }
-
-    public string BoardToString(GameManager pieces)
-    {
-        string boardString = "";
-        for (int col = 4; col >= 0; col--)
-        {
-            for (int row = 0; row < 5; row++)
-            {
-                if (white.pieces.Contains(pieces.pieces[row, col]))
-                {
-                    boardString += "■";
-                }
-                else if (black.pieces.Contains(pieces.pieces[row, col]))
-                {
-                    boardString += "□";
-                }
-                else
-                {
-                    boardString += "▪ ";
-                }
-            }
-            boardString += "\n";
-        }
-        return boardString;
-    }
-
-    // Solver Exclusive methods
-
-    private GameManager(GameObject[,] pieces, Player currentPlayer, Player otherPlayer, Player winner) {
-        this.pieces = (GameObject[,]) pieces.Clone();
-
-        this.winner = winner;
-
-        this.currentPlayer = currentPlayer;
-        this.otherPlayer = otherPlayer;
-    }
-
-    public GameManager doMove(List<Vector2Int> move) {
-
-        Vector2Int startGridPoint = move[0];
-        Vector2Int endGridPoint = move[1];
-
-        GameObject startPiece = PieceAtGrid(startGridPoint);
-
-        GameManager newGameManager = new GameManager(pieces, currentPlayer, otherPlayer, winner);
-        newGameManager.Move(startPiece, endGridPoint);
-        newGameManager.checkWin(endGridPoint);
-        newGameManager.NextPlayer();
-
-        return newGameManager;
-    }
-
-    public List<List<Vector2Int>> generateMoves()
-    {
-        List<List<Vector2Int>> list = new List<List<Vector2Int>>();
-
-        for (int i = 0; i < 25; i++)
-        {
-            Vector2Int start = new Vector2Int(i / 5, i % 5);
-            GameObject piece = PieceAtGrid(start);
-
-            if (piece && DoesPieceBelongToCurrentPlayer(piece))
-            {
-                foreach (Vector2Int end in MovesForPiece(piece))
-                {
-                    list.Add(new List<Vector2Int> { start, end });
-                }
-            }
-        }
-        return list;
-    }
-
-    public byte primitive() {
-        if (winner != null) {
-            if (winner == currentPlayer) {
-                return 2;
-            }
-            if (winner == otherPlayer) {
-                return 1;
-            }
-        }
-        return 0;
-    }
-
-    private void checkWin(Vector2Int gridPoint) {
-        if (winner != null) {
-            return;
-        }
-        foreach (Vector2Int dir in lineDirections) {
-            int lineLen = 0;
-            for (int i = -4; i < 5; i++)
-            {
-                GameObject newPiece = PieceAtGrid(new Vector2Int(dir.x * i + gridPoint.x, dir.y * i + gridPoint.y));
-                if (newPiece && DoesPieceBelongToCurrentPlayer(newPiece))
-                {
-                    lineLen++;
-                    if (lineLen >= 4)
-                    {
-                        winner = currentPlayer;
-                        return;
-                    }
-                }
-                else
-                {
-                    lineLen = 0;
-                }
-            }
-        }
+        SetText();
     }
 
     private GameObject[,] rotate(GameObject[,] src)
@@ -407,11 +337,5 @@ public class GameManager : MonoBehaviour
             }
         }
         return min;
-    }
-
-    public static GameManager Deserialize(ulong hash)
-    {
-        GameObject[,] pieces = CombinatorialHash.Unhash(hash, black.pieces, white.pieces);
-        return new GameManager(pieces, black, white, null);
     }
 }

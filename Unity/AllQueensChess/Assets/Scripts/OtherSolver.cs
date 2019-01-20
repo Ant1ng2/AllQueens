@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 public class OtherSolver {
-
+    /*
     private GameManager currentState;
     private IDictionary<ulong, byte> Memory = new Dictionary<ulong, byte>();
     private Stack<ulong> stack = new Stack<ulong>();
@@ -89,4 +89,5 @@ public class OtherSolver {
         }
         return Memory[firstStateSerialized];
     }
+    */
 }

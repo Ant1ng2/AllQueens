@@ -19,7 +19,7 @@ public static class CombinatorialHash
         return result;
     }
 
-    public static ulong Hash(GameObject[,] board, Player turn)
+    public static ulong Hash(GameObject[,] board, Player current)
     {
         uint hashPieces = 0;
         uint hashColors = 0;
@@ -34,7 +34,7 @@ public static class CombinatorialHash
             {
                 hashPieces += Choose(24 - i, l);
                 l--;
-                if (turn.pieces.Contains(j))
+                if (current.pieces.Contains(j))
                 {
                     hashColors += Choose(l, k);
                     k--;
@@ -42,6 +42,31 @@ public static class CombinatorialHash
             }
         }
         return ((ulong) hashColors << 32) | (hashPieces);
+    }
+
+    public static ulong HashString(string[,] board, string current)
+    {
+        uint hashPieces = 0;
+        uint hashColors = 0;
+
+        int l = 12;
+        int k = 6;
+
+        for (int i = 0; i < 25; i++)
+        {
+            string j = board[i % 5, i / 5];
+            if (j != null && l > 0)
+            {
+                hashPieces += Choose(24 - i, l);
+                l--;
+                if (current == j)
+                {
+                    hashColors += Choose(l, k);
+                    k--;
+                }
+            }
+        }
+        return ((ulong)hashColors << 32) | (hashPieces);
     }
 
     public static GameObject[,] Unhash(ulong hash, List<GameObject> current, List<GameObject> other)
@@ -73,6 +98,41 @@ public static class CombinatorialHash
                 {
                     f--;
                     board[i % 5, i / 5] = other[f];
+                }
+            }
+        }
+        return board;
+    }
+
+    public static string[,] UnhashString(ulong hash, string current, string other)
+    {
+        uint hashColors = (uint)(hash >> 32);
+        uint hashPieces = (uint)(hash & uint.MaxValue);
+
+        string[,] board = new string[5, 5];
+
+        int l = 12;
+        int k = 6;
+        int f = 6;
+
+        for (int i = 0; i < 25; i++)
+        {
+            uint value = Choose(24 - i, l);
+            if (hashPieces >= value)
+            {
+                hashPieces -= value;
+                l--;
+                value = Choose(l, k);
+                if (hashColors >= value)
+                {
+                    hashColors -= value;
+                    k--;
+                    board[i % 5, i / 5] = current;
+                }
+                else
+                {
+                    f--;
+                    board[i % 5, i / 5] = other;
                 }
             }
         }

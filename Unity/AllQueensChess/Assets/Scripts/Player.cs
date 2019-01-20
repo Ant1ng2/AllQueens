@@ -54,4 +54,9 @@ public class Player
             this.forward = -1;
         }
     }
+
+    public void Clear()
+    {
+        pieces = new List<GameObject>();
+    }
 }
