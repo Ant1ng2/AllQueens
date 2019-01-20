@@ -41,13 +41,13 @@ public static class CombinatorialHash
                 }
             }
         }
-        return ((ulong) hashPieces << 32) | ((ulong) hashColors);
+        return ((ulong) hashColors << 32) | (hashPieces);
     }
 
     public static GameObject[,] Unhash(ulong hash, List<GameObject> current, List<GameObject> other)
     {
-        uint hashPieces = (uint) (hash >> 32);
-        uint hashColors = (uint)(hash & uint.MaxValue);
+        uint hashColors = (uint) (hash >> 32);
+        uint hashPieces = (uint)(hash & uint.MaxValue);
 
         GameObject[,] board = new GameObject[5, 5];
 

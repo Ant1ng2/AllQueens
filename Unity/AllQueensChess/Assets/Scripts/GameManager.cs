@@ -48,8 +48,8 @@ public class GameManager : MonoBehaviour
 
     private GameObject[,] pieces;
 
-    private Player white;
-    private Player black;
+    private static Player white;
+    private static Player black;
     public Player currentPlayer;
     public Player otherPlayer;
     public Player winner;
@@ -102,9 +102,12 @@ public class GameManager : MonoBehaviour
 
     public void AddPiece(GameObject prefab, Player player, int col, int row)
     {
-        GameObject pieceObject = board.AddPiece(prefab, col, row);
-        player.pieces.Add(pieceObject);
-        pieces[col, row] = pieceObject;
+        if (board != null)
+        {
+            GameObject pieceObject = board.AddPiece(prefab, col, row);
+            player.pieces.Add(pieceObject);
+            pieces[col, row] = pieceObject;
+        }
     }
 
     public void SelectPieceAtGrid(Vector2Int gridPoint)
@@ -259,11 +262,9 @@ public class GameManager : MonoBehaviour
 
     // Solver Exclusive methods
 
-    private GameManager(GameObject[,] pieces, Player currentPlayer, Player otherPlayer, Player white, Player black, Player winner) {
+    private GameManager(GameObject[,] pieces, Player currentPlayer, Player otherPlayer, Player winner) {
         this.pieces = (GameObject[,]) pieces.Clone();
 
-        this.white = white;
-        this.black = black;
         this.winner = winner;
 
         this.currentPlayer = currentPlayer;
@@ -277,7 +278,7 @@ public class GameManager : MonoBehaviour
 
         GameObject startPiece = PieceAtGrid(startGridPoint);
 
-        GameManager newGameManager = new GameManager(pieces, currentPlayer, otherPlayer, white, black, winner);
+        GameManager newGameManager = new GameManager(pieces, currentPlayer, otherPlayer, winner);
         newGameManager.Move(startPiece, endGridPoint);
         newGameManager.checkWin(endGridPoint);
         newGameManager.NextPlayer();
@@ -408,9 +409,9 @@ public class GameManager : MonoBehaviour
         return min;
     }
 
-    public GameManager Deserialize(ulong hash)
+    public static GameManager Deserialize(ulong hash)
     {
         GameObject[,] pieces = CombinatorialHash.Unhash(hash, black.pieces, white.pieces);
-        return new GameManager(pieces, otherPlayer, currentPlayer, black, white, null);
+        return new GameManager(pieces, black, white, null);
     }
 }

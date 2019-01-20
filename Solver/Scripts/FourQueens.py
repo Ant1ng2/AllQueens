@@ -2,6 +2,7 @@ from Queen import Queen
 from enum import Enum
 import math
 from ZobristHash import *
+from CombinatorialHash import *
 
 lineDirections = [(0,1), (1,0), (1,1), (1,-1)]
 
@@ -14,7 +15,7 @@ def main():
 	game = FourQueens()
 
 class FourQueens():
-	def __init__(self, state=None, turn="w", hash=ZobristHash(), winner=""):
+	def __init__(self, state=None, turn="w", hash=CombinatorialHash(), winner=""):
 		if state is None:
 			self.pieces = []
 			for _ in range(5):
@@ -153,6 +154,9 @@ class FourQueens():
 				temp = rotate(temp)
 			temp = flip(temp)
 		return self.hash.hash(pieces, self.turn)
+
+	def deserialize(self, hash):
+		pieces = self.hash.unhash(hash, "w", "b")
 
 def rotate(board):
 	pieces = []
