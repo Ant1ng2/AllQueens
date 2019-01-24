@@ -5,31 +5,18 @@ namespace ConsoleApp1
 {
     public class Solver
     {
-        private Game currentState;
-        private Stack<ulong> stack = new Stack<ulong>();
-
-        public static void Main(string[] args)
-        {
-            Program.Initialize();
-            Solver state = new Solver();
-            state.Solve();
-        }
-
-        public Solver()
-        {
-            currentState = new Game();
-        }
-
         public byte GetValueFromState(Game state)
         {
             ulong serialized = state.Serialize();
             return Program.Get(serialized);
         }
 
-        private byte Solve()
+        public byte Solve(Game state)
         {
+            Stack<ulong> stack = new Stack<ulong>();
             long count = 0;
-            ulong firstStateSerialized = currentState.Serialize();
+            ulong firstStateSerialized;
+            firstStateSerialized = state.Serialize();
 
             if (Program.Contains(firstStateSerialized))
             {
@@ -43,12 +30,12 @@ namespace ConsoleApp1
             {
                 count += 1;
                 ulong serialized = stack.Peek();
-                currentState = Game.Deserialize(serialized);
+                state = Game.Deserialize(serialized);
 
                 Console.WriteLine(count.ToString() + "\n");
-                Console.WriteLine(currentState.ToString() + "\n");
+                Console.WriteLine(state.ToString() + "\n");
 
-                byte primitive = currentState.primitive();
+                byte primitive = state.primitive();
                 if (primitive != 0)
                 {
                     Program.Add(serialized, primitive);
@@ -58,11 +45,11 @@ namespace ConsoleApp1
                 {
                     bool solvable = true;
                     bool winFlag = true;
-                    var moveList = currentState.generateMoves();
+                    var moveList = state.generateMoves();
 
                     foreach (var move in moveList)
                     {
-                        serialized = currentState.Move(move).Serialize();
+                        serialized = state.Move(move).Serialize();
                         if (!Program.Contains(serialized))
                         {
                             solvable = false;

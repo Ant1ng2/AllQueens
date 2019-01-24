@@ -10,11 +10,13 @@ namespace ConsoleApp1
 
         private string[,] pieces = new string[5, 5];
 
-        private string currentTurn { get; }
-        private string otherTurn { get; }
+        public string currentTurn { get; private set; }
+        public string otherTurn { get; private set; }
 
         protected Vector2Int[] lineDirections = {new Vector2Int(0,1), new Vector2Int(1, 0),
-        new Vector2Int(1, 1), new Vector2Int(1, -1)};
+            new Vector2Int(1, 1), new Vector2Int(1, -1),
+            new Vector2Int(0, -1), new Vector2Int(-1,0),
+            new Vector2Int(-1, -1), new Vector2Int(-1, 1)};
 
         public Game()
         {
@@ -138,11 +140,19 @@ namespace ConsoleApp1
             if (PieceAtGrid(gridPoint) != null)
             {
                 List<Vector2Int> list = new List<Vector2Int>();
-                for (int i = -4; i < 5; i++)
+                foreach (Vector2Int dir in lineDirections)
                 {
-                    foreach (Vector2Int dir in lineDirections)
+                    for (int i = 1; i < 5; i++)
                     {
-                        list.Add(new Vector2Int(dir.x * i + gridPoint.x, dir.y * i + gridPoint.y));
+                        Vector2Int position = new Vector2Int(dir.x * i + gridPoint.x, dir.y * i + gridPoint.y);
+                        if (PieceAtGrid(position) != null)
+                        {
+                            i = 5;
+                        }
+                        else
+                        {
+                            list.Add(position);
+                        }
                     }
                 }
                 list.RemoveAll(tile => tile.x < 0 || tile.x > 4

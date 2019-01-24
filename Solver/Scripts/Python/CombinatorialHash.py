@@ -1,18 +1,18 @@
+def Choose(n, k):
+    if k > n:
+        return 0
+    if k * 2 > n:
+        k = n - k
+    if k == 0:
+        return 1
+
+    result = n
+    for i in range(2, k+1):
+        result *= (n - i + 1)
+        result /= i
+    return result
+
 class CombinatorialHash:
-
-    def Choose(n, k):
-        if k > n:
-            return 0
-        if k * 2 > n:
-            k = n - k
-        if k == 0:
-            return 1
-
-        result = n
-        for i in range(2, k+1):
-            result *= (n - i + 1)
-            result /= i
-        return result
 
     def hash(board, turn):
         hashPieces = 0
@@ -36,12 +36,12 @@ class CombinatorialHash:
         hashColors = hash >> 32
         hashPieces = hash & (2**32 - 1)
 
-		pieces = []
-		for _ in range(5):
-			row = []
-			for _ in range(5):
-				row = row + [""]
-			pieces = pieces + [row]
+        pieces = []
+        for _ in range(5):
+            row = []
+            for _ in range(5):
+                row = row + [""]
+            pieces = pieces + [row]
 
         l = 12
         k = 6
@@ -53,7 +53,7 @@ class CombinatorialHash:
                 hashPieces -= value
                 l -= 1
                 value = Choose(l, k)
-                if hashColors >= value
+                if hashColors >= value:
                     hashColors -= value
                     k -= 1
                     pieces[i % 5, i / 5] = current
