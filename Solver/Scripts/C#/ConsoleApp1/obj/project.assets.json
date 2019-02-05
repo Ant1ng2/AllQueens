@@ -787,11 +787,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\aclin\\Documents\\Chess\\Solver\\Scripts\\ConsoleApp1\\ConsoleApp1\\ConsoleApp1.csproj",
+      "projectUniqueName": "C:\\Users\\aclin\\Documents\\Chess\\Solver\\Scripts\\C#\\ConsoleApp1\\ConsoleApp1.csproj",
       "projectName": "ConsoleApp1",
-      "projectPath": "C:\\Users\\aclin\\Documents\\Chess\\Solver\\Scripts\\ConsoleApp1\\ConsoleApp1\\ConsoleApp1.csproj",
+      "projectPath": "C:\\Users\\aclin\\Documents\\Chess\\Solver\\Scripts\\C#\\ConsoleApp1\\ConsoleApp1.csproj",
       "packagesPath": "C:\\Users\\aclin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\aclin\\Documents\\Chess\\Solver\\Scripts\\ConsoleApp1\\ConsoleApp1\\obj\\",
+      "outputPath": "C:\\Users\\aclin\\Documents\\Chess\\Solver\\Scripts\\C#\\ConsoleApp1\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

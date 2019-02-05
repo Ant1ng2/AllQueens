@@ -5,12 +5,11 @@ namespace ConsoleApp1
 {
     public class GameManager
     {
-        private static Game game;
+        private static Game game = new TicTacToe();
         private static Solver solver;
 
-        public static void Initialize(Game state, Solver solve)
+        public static void Initialize( Solver solve)
         {
-            game = state;
             solver = solve;
             if (solver != null)
             {
@@ -20,9 +19,9 @@ namespace ConsoleApp1
 
         public static void Main(string[] args)
         {
-            Initialize(new Game(), null);
+            Initialize(null);
 
-            while (game.primitive() == 0)
+            while (game.Primitive() == 0)
             {
                 Write();
                 if (game.currentTurn == "W" || solver == null)
@@ -46,42 +45,23 @@ namespace ConsoleApp1
             {
                 Console.Write("Solver: " + solver.Solve(game).ToString() + "\n");
             }
-            Console.Write("Primitive: " + game.primitive().ToString() + "\n");
+            Console.Write("Primitive: " + game.Primitive().ToString() + "\n");
             Console.Write(game.currentTurn + "'s turn" + "\n");
             Console.Write(game.ToString() + "\n");
         }
 
         private static void Prompt()
         {
-            Console.Write("Enter Piece: ");
-            string first = Console.ReadLine();
-            Console.Write("Enter End: ");
-            string second = Console.ReadLine();
+            var response = game.Prompt();
 
-            Vector2Int begin = new Vector2Int(first[0] - '0', first[2] - '0');
-            Vector2Int finish = new Vector2Int(second[0] - '0', second[2] - '0');
-
-            List<Vector2Int> move = new List<Vector2Int>() { begin, finish };
-
-            bool exists = false;
-
-            foreach (List<Vector2Int> possible in game.generateMoves())
+            if (response.Item1)
             {
-                if (move[0].Equals(possible[0]) && move[1].Equals(possible[1]))
-                {
-                    exists = true;
-                }
-            }
-
-            if (exists)
-            {
-                game = game.Move(move);
+                game = game.Move(response.Item2);
             }
             else
             {
                 Console.Write("Not a valid move, try again \n");
             }
-
         }
     }
 }

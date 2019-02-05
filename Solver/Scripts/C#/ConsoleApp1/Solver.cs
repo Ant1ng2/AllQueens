@@ -30,12 +30,12 @@ namespace ConsoleApp1
             {
                 count += 1;
                 ulong serialized = stack.Peek();
-                state = Game.Deserialize(serialized);
+                state = state.Deserialize(serialized);
 
                 Console.WriteLine(count.ToString() + "\n");
                 Console.WriteLine(state.ToString() + "\n");
 
-                byte primitive = state.primitive();
+                byte primitive = state.Primitive();
                 if (primitive != 0)
                 {
                     Program.Add(serialized, primitive);
@@ -45,7 +45,7 @@ namespace ConsoleApp1
                 {
                     bool solvable = true;
                     bool winFlag = true;
-                    var moveList = state.generateMoves();
+                    var moveList = state.GenerateMoves();
 
                     foreach (var move in moveList)
                     {
