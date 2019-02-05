@@ -10,6 +10,10 @@ This project is intended to create a solver for the game [AllQueensChess.](https
 
 There also contains a Unity version of the game in the [Unity](https://github.com/Ant1ng2/FourQueens/tree/master/Unity) folder for future use.
 
+<p align="center">
+  <img src="Chart.png">
+</p>
+
 ## Game
 This game follows the rules of regular chess with the following exceptions:
 * This game is played with a 5-by-5 board and 12 Queens, 6 Queens are controlled by each player.
