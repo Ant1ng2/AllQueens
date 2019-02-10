@@ -93,6 +93,8 @@ namespace ConsoleApp1
         public override Game Move(List<Vector2Int> list)
         {
             Vector2Int position = list[0];
+            Console.Write(position.x);
+            Console.Write(position.y);
 
             if (GetPiece(position) == null)
             {
@@ -121,13 +123,20 @@ namespace ConsoleApp1
         public override string ToString()
         {
             string boardString = "";
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 3; i++)
             {
-                boardString += GetPiece(new Vector2Int(i / 3, i % 3));
-                if (i % 3 == 0)
+                for (int j = 0; j < 3; j++)
                 {
-                    boardString += "\n";
+                    if (GetPiece(new Vector2Int(j, i)) == null)
+                    {
+                        boardString += " ";
+                    }
+                    else
+                    {
+                        boardString += GetPiece(new Vector2Int(j, i));
+                    }
                 }
+                boardString += "\n";
             }
             return boardString;
         }
