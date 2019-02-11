@@ -5,8 +5,10 @@ namespace ConsoleApp1
 {
     public class GameManager
     {
-        private static Game game = new TicTacToe();
+        private static Game game = new AllQueensChess();
         private static Solver solver;
+
+        private static String playerTurn = game.currentTurn;
 
         public static void Initialize( Solver solve)
         {
@@ -24,19 +26,22 @@ namespace ConsoleApp1
             while (game.Primitive() == 0)
             {
                 Write();
-                if (game.currentTurn == "W" || solver == null)
+                if (game.currentTurn == playerTurn || solver == null)
                 {
                     Prompt();
                 }
                 else
                 {
+                    List<Vector2Int> move = solver.getMove(game);
+                    game = game.Move(move);
                 }
 
                 Console.Write("-------------------------------\n");
             }
 
             Write();
-            Console.Write("Game Over");
+            Console.Write("Game Over (Press any key to continue)");
+            Console.ReadKey();
         }
 
         private static void Write()

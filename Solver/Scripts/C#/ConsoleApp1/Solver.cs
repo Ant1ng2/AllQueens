@@ -5,12 +5,25 @@ namespace ConsoleApp1
 {
     public class Solver
     {
-        public byte GetValueFromState(Game state)
+        //Local store of Game States (do not use for large games)
+        private Dictionary<ulong, byte> memory= new Dictionary<ulong, byte>();
+            
+        private byte getValueData(Game state)
         {
             ulong serialized = state.Serialize();
             return Program.Get(serialized);
         }
 
+        private byte getValueMem(Game state)
+        {
+            ulong serialized = state.Serialize();
+            if (memory.ContainsKey(serialized))
+            {
+                return memory[serialized];
+            }
+            return 0;
+        }
+        /*
         public byte Solve(Game state)
         {
             Stack<ulong> stack = new Stack<ulong>();
@@ -81,6 +94,81 @@ namespace ConsoleApp1
                 }
             }
             return Program.Get(firstStateSerialized);
+        }
+        */
+        public byte Solve(Game state)
+        {
+            bool winFlag = false;
+            bool tieFlag = false;
+
+            ulong serialized = state.Serialize();
+
+            if (memory.ContainsKey(serialized))
+            {
+                return memory[serialized];
+            }
+            byte primitive = state.Primitive();
+
+            if (primitive != 0)
+            {
+                memory[serialized] = primitive;
+                return primitive;
+            }
+
+            foreach (List<Vector2Int> move in state.GenerateMoves())
+            {
+                Game nextState = state.Move(move);
+                if (Solve(nextState) == 1)
+                {
+                    memory[serialized] = 2;
+                    winFlag = true;
+                }
+                if (Solve(nextState) == 3)
+                {
+                    tieFlag = true;
+                }
+            }
+            if (!winFlag)
+            {
+                if (tieFlag)
+                {
+                    memory[serialized] = 3;
+                    return 3;
+                }
+                memory[serialized] = 1;
+                return 1;
+            }
+            return 2;
+        }
+
+        //Please run Solve on the root gameState before running this function. (Plans to implement in-game solving coming soon).
+        public List<Vector2Int> getMove(Game state)
+        {
+            if (getValueMem(state) < 2)
+            {
+                return state.GenerateMoves()[0];
+            }
+
+            foreach (List<Vector2Int> move in state.GenerateMoves())
+            {
+                Game nextState = state.Move(move);
+
+                if (getValueMem(nextState) == 1)
+                {
+                    return move;
+                }
+            }
+            
+            foreach(List<Vector2Int> move in state.GenerateMoves())
+            {
+                Game nextState = state.Move(move);
+
+                if (getValueMem(nextState) == 3)
+                {
+                    return move;
+                }
+            }
+            throw new Exception();
         }
     }
 }

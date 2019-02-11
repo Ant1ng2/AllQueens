@@ -177,7 +177,7 @@ namespace ConsoleApp1
                     }
                 }
             }
-            return min;
+           return min;
         }
 
         public override Game Deserialize(ulong hash)

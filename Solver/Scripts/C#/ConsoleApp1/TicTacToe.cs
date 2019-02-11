@@ -15,7 +15,7 @@ namespace ConsoleApp1
             new Vector2Int(0, 1),
             new Vector2Int(1, 0),
             new Vector2Int(1, 1),
-            new Vector2Int(1, -1)
+            new Vector2Int(1, -1),
         };
         #endregion
 
@@ -60,32 +60,52 @@ namespace ConsoleApp1
         #region Public game info
         public override byte Primitive()
         {
-            for (int i = 0; i < 9; i++)
+            int numPieces = 0;
+            for (int j = 0; j < 3; j++)
             {
-                Vector2Int point = new Vector2Int(i / 3, i % 3);
-                string piece = GetPiece(point);
-                foreach (var dir in lineDirections)
+                for (int i = 0; i < 3; i++)
                 {
-                    int lineLen = 0;
-                    for (int j = -2; j < 3; j++)
+                    Vector2Int position = new Vector2Int(i, j);
+                    string piece = GetPiece(position);
+
+                    if (piece != null)
                     {
-                        if (GetPiece(new Vector2Int(dir.x * j + point.x, dir.y * j + point.y)) == piece)
+                        numPieces += 1;
+                        int lineLen = 0;
+                        foreach (Vector2Int dir in lineDirections)
                         {
-                            lineLen++;
-                            if (lineLen >= 3)
+                            for (int f = -2; f < 3; f++)
                             {
-                                if (piece == currentTurn)
+                                Vector2Int check = new Vector2Int(position.x + f * dir.x, 
+                                    position.y + f * dir.y);
+                                if (GetPiece(check) != null && GetPiece(check) == piece)
                                 {
-                                    return 2;
+                                    lineLen += 1;
                                 }
-                                if (piece == otherTurn)
+                                else
                                 {
-                                    return 1;
+                                    lineLen = 0;
+                                }
+
+                                if (lineLen >= 3)
+                                {
+                                    if (piece == otherTurn)
+                                    {
+                                        return 1;
+                                    }
+                                    if (piece == currentTurn)
+                                    {
+                                        return 2;
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
+            if (numPieces >= 9)
+            {
+                return 3;
             }
             return 0;
         }
@@ -93,8 +113,6 @@ namespace ConsoleApp1
         public override Game Move(List<Vector2Int> list)
         {
             Vector2Int position = list[0];
-            Console.Write(position.x);
-            Console.Write(position.y);
 
             if (GetPiece(position) == null)
             {
@@ -123,17 +141,17 @@ namespace ConsoleApp1
         public override string ToString()
         {
             string boardString = "";
-            for (int i = 0; i < 3; i++)
+            for (int j = 2; j >= 0; j--)
             {
-                for (int j = 0; j < 3; j++)
+                for (int i = 0; i < 3; i++)
                 {
-                    if (GetPiece(new Vector2Int(j, i)) == null)
+                    if (GetPiece(new Vector2Int(i, j)) == null)
                     {
                         boardString += " ";
                     }
                     else
                     {
-                        boardString += GetPiece(new Vector2Int(j, i));
+                        boardString += GetPiece(new Vector2Int(i, j));
                     }
                 }
                 boardString += "\n";
@@ -143,7 +161,26 @@ namespace ConsoleApp1
 
         public override ulong Serialize()
         {
-            throw new NotImplementedException();
+            string boardString = "1";
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (GetPiece(new Vector2Int(i, j)) == null)
+                    {
+                        boardString += "3";
+                    }
+                    else if (GetPiece(new Vector2Int(i, j)) == "X")
+                    {
+                        boardString += "2";
+                    }
+                    else
+                    {
+                        boardString += "1";
+                    }
+                }
+            }
+            return Convert.ToUInt64(boardString);
         }
 
         public override Game Deserialize(ulong hash)
@@ -155,6 +192,11 @@ namespace ConsoleApp1
         {
             Console.Write("Enter Position: ");
             string position = Console.ReadLine();
+
+            if (position.Length != 3 || position[1] != ',')
+            {
+                return (false, null);
+            }
 
             Vector2Int begin = new Vector2Int(position[0] - '0', position[2] - '0');
 
@@ -171,6 +213,50 @@ namespace ConsoleApp1
                 }
             }
             return (exists, move);
+        }
+        #endregion
+
+        #region Optimizations
+        private static string[,] rotate(string[,] src)
+        {
+            int width;
+            int height;
+            string[,] dst;
+
+            width = src.GetUpperBound(0) + 1;
+            height = src.GetUpperBound(1) + 1;
+            dst = new string[height, width];
+
+            for (int row = 0; row < height; row++)
+            {
+                for (int col = 0; col < width; col++)
+                {
+                    int newRow;
+                    int newCol;
+
+                    newRow = col;
+                    newCol = height - (row + 1);
+
+                    dst[newCol, newRow] = src[col, row];
+                }
+            }
+            return dst;
+        }
+
+        private static string[,] flip(string[,] arrayToFlip)
+        {
+            int rows = arrayToFlip.GetLength(0);
+            int columns = arrayToFlip.GetLength(1);
+            string[,] flippedArray = new string[rows, columns];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    flippedArray[i, j] = arrayToFlip[(rows - 1) - i, j];
+                }
+            }
+            return flippedArray;
         }
         #endregion
     }
